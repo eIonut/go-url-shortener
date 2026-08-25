@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: jobqueue
+      POSTGRES_DB: urlshortener
     ports:
       - "5432:5432"
     volumes:
@@ -26,6 +26,6 @@ services:
     restart: unless-stopped
 
 volumes:
+  postgres_data:
   redis-data:
     driver: local
-  postgres_data:
