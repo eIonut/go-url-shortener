@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"go-url-shortener/database/db"
 	"go-url-shortener/helpers"
+	"log"
 	"net/http"
 	"time"
 
@@ -95,5 +96,34 @@ func (h *Handler) RedirectToURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if url.ExpiresAt.Valid && !time.Now().Before(url.ExpiresAt.Time) {
+		http.Error(w, "url has expired", http.StatusGone)
+		return
+	}
+
+	if err := h.queries.IncrementClickCount(r.Context(), code); err != nil {
+		log.Println("failed to increment click count:", err)
+	}
+
 	http.Redirect(w, r, url.DestinationUrl, http.StatusFound)
+}
+
+func (h *Handler) GetURLStatistics(w http.ResponseWriter, r *http.Request) {
+	code := r.PathValue("code")
+
+	urlInformation, err := h.queries.GetURLInformation(r.Context(), code)
+
+	if err != nil {
+		http.Error(w, "url information not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	err = json.NewEncoder(w).Encode(urlInformation)
+	if err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		return
+	}
+
 }

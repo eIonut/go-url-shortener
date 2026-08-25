@@ -59,7 +59,7 @@ func (q *Queries) CreateURL(ctx context.Context, arg CreateURLParams) (Url, erro
 }
 
 const getURLByShortCode = `-- name: GetURLByShortCode :one
-SELECT destination_url, short_code
+SELECT destination_url, short_code, expires_at
 FROM urls
 wHERE short_code = $1
 `
@@ -67,11 +67,49 @@ wHERE short_code = $1
 type GetURLByShortCodeRow struct {
 	DestinationUrl string
 	ShortCode      string
+	ExpiresAt      pgtype.Timestamptz
 }
 
 func (q *Queries) GetURLByShortCode(ctx context.Context, shortCode string) (GetURLByShortCodeRow, error) {
 	row := q.db.QueryRow(ctx, getURLByShortCode, shortCode)
 	var i GetURLByShortCodeRow
-	err := row.Scan(&i.DestinationUrl, &i.ShortCode)
+	err := row.Scan(&i.DestinationUrl, &i.ShortCode, &i.ExpiresAt)
 	return i, err
+}
+
+const getURLInformation = `-- name: GetURLInformation :one
+
+SELECT short_code, destination_url, click_count, created_at
+FROM urls
+WHERE short_code = $1
+`
+
+type GetURLInformationRow struct {
+	ShortCode      string
+	DestinationUrl string
+	ClickCount     int32
+	CreatedAt      pgtype.Timestamptz
+}
+
+func (q *Queries) GetURLInformation(ctx context.Context, shortCode string) (GetURLInformationRow, error) {
+	row := q.db.QueryRow(ctx, getURLInformation, shortCode)
+	var i GetURLInformationRow
+	err := row.Scan(
+		&i.ShortCode,
+		&i.DestinationUrl,
+		&i.ClickCount,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const incrementClickCount = `-- name: IncrementClickCount :exec
+UPDATE urls
+SET click_count = click_count + 1
+WHERE short_code = $1
+`
+
+func (q *Queries) IncrementClickCount(ctx context.Context, shortCode string) error {
+	_, err := q.db.Exec(ctx, incrementClickCount, shortCode)
+	return err
 }

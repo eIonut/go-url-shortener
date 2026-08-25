@@ -7,6 +7,7 @@ func NewRouter(handler *Handler) http.Handler {
 
 	mux.HandleFunc("POST /urls", handler.CreateURL)
 	mux.HandleFunc("GET /{code}", handler.RedirectToURL)
+	mux.HandleFunc("GET /urls/{code}", handler.GetURLStatistics)
 
 	return mux
 }
