@@ -10,3 +10,13 @@ VALUES (
     $3
 )
 RETURNING *;
+
+-- name: CountURLByShortCode :one
+SELECT COUNT(*)
+FROM urls
+WHERE short_code = $1;
+
+-- name: GetURLByShortCode :one
+SELECT destination_url, short_code
+FROM urls
+wHERE short_code = $1;

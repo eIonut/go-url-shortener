@@ -13,7 +13,7 @@ type Config struct {
 func Load() Config {
 	return Config{
 		Port:        getEnv("PORT", "5001"),
-		DatabaseURL: getEnv("DatabaseURL", "postgres://username:password@localhost:5432/url_shortener")}
+		DatabaseURL: getEnv("DATABASE_URL", "postgres://postgres:password@localhost:5433/urlshortener?sslmode=disable")}
 }
 
 func getEnv(key string, fallback string) string {

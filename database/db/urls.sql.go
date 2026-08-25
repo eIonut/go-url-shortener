@@ -11,6 +11,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countURLByShortCode = `-- name: CountURLByShortCode :one
+SELECT COUNT(*)
+FROM urls
+WHERE short_code = $1
+`
+
+func (q *Queries) CountURLByShortCode(ctx context.Context, shortCode string) (int64, error) {
+	row := q.db.QueryRow(ctx, countURLByShortCode, shortCode)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createURL = `-- name: CreateURL :one
 INSERT INTO urls (
     short_code,
@@ -42,5 +55,23 @@ func (q *Queries) CreateURL(ctx context.Context, arg CreateURLParams) (Url, erro
 		&i.CreatedAt,
 		&i.ExpiresAt,
 	)
+	return i, err
+}
+
+const getURLByShortCode = `-- name: GetURLByShortCode :one
+SELECT destination_url, short_code
+FROM urls
+wHERE short_code = $1
+`
+
+type GetURLByShortCodeRow struct {
+	DestinationUrl string
+	ShortCode      string
+}
+
+func (q *Queries) GetURLByShortCode(ctx context.Context, shortCode string) (GetURLByShortCodeRow, error) {
+	row := q.db.QueryRow(ctx, getURLByShortCode, shortCode)
+	var i GetURLByShortCodeRow
+	err := row.Scan(&i.DestinationUrl, &i.ShortCode)
 	return i, err
 }
