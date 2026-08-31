@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 func startServer(server *http.Server, serverErr chan<- error) {
@@ -27,6 +28,15 @@ func startServer(server *http.Server, serverErr chan<- error) {
 
 func main() {
 	cfg := config.Load()
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.REDIS_ADDR,
+		Password: "", // no password
+		DB:       0,  // use default DB
+		Protocol: 2,
+	})
+
+	defer rdb.Close()
 
 	conn, err := pgx.Connect(context.Background(), cfg.DatabaseURL)
 	if err != nil {

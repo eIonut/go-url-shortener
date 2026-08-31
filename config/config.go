@@ -8,12 +8,15 @@ import (
 type Config struct {
 	Port        string
 	DatabaseURL string
+	REDIS_ADDR  string
 }
 
 func Load() Config {
 	return Config{
 		Port:        getEnv("PORT", "5001"),
-		DatabaseURL: getEnv("DATABASE_URL", "postgres://postgres:password@localhost:5433/urlshortener?sslmode=disable")}
+		DatabaseURL: getEnv("DATABASE_URL", "postgres://postgres:password@localhost:5433/urlshortener?sslmode=disable"),
+		REDIS_ADDR:  getEnv("REDIS_ADDR", "localhost:6379"),
+	}
 }
 
 func getEnv(key string, fallback string) string {

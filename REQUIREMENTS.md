@@ -17,15 +17,15 @@ Implement an endpoint:
 
 It should:
 
--   Accept a destination URL.
--   Validate the input.
--   Generate a unique short code.
--   Store the short code and destination URL.
--   Return the generated short URL.
+- Accept a destination URL.
+- Validate the input.
+- Generate a unique short code.
+- Store the short code and destination URL.
+- Return the generated short URL.
 
 Example request:
 
-``` json
+```json
 {
   "url": "https://example.com/some/very/long/url"
 }
@@ -39,9 +39,9 @@ Implement an endpoint:
 
 It should:
 
--   Find the URL associated with the short code.
--   Redirect the client to the original URL.
--   Return an appropriate error when the code does not exist.
+- Find the URL associated with the short code.
+- Redirect the client to the original URL.
+- Return an appropriate error when the code does not exist.
 
 ### 3. PostgreSQL
 
@@ -49,12 +49,12 @@ Use PostgreSQL for persistence.
 
 Store at minimum:
 
--   ID
--   Short code
--   Destination URL
--   Created timestamp
--   Expiration timestamp (optional)
--   Click count
+- ID
+- Short code
+- Destination URL
+- Created timestamp
+- Expiration timestamp (optional)
+- Click count
 
 ### 4. sqlc
 
@@ -73,10 +73,10 @@ Add an endpoint for retrieving information about a shortened URL:
 
 Return at minimum:
 
--   Short code
--   Destination URL
--   Click count
--   Created timestamp
+- Short code
+- Destination URL
+- Click count
+- Created timestamp
 
 ### 6. URL Expiration
 
@@ -90,10 +90,10 @@ Read configuration from environment variables.
 
 Examples:
 
--   Server port
--   PostgreSQL connection string
--   Base URL
--   Redis address
+- Server port
+- PostgreSQL connection string
+- Base URL
+- Redis address
 
 Provide a `.env.example`.
 
@@ -109,7 +109,7 @@ run locally.
 
 Use Docker Compose for infrastructure such as PostgreSQL and Redis.
 
-------------------------------------------------------------------------
+---
 
 ## Phase 2 --- Redis Cache
 
@@ -127,62 +127,47 @@ Use a TTL for cached entries.
 The application must still work correctly when a value is not present in
 the cache.
 
-------------------------------------------------------------------------
+---
 
 ## Error Handling
 
 Handle at minimum:
 
--   Invalid request body
--   Invalid URL
--   Unknown short code
--   Expired URL
--   Database errors
--   Cache errors
--   Duplicate/generated-code collisions
+- Invalid request body
+- Invalid URL
+- Unknown short code
+- Expired URL
+- Database errors
+- Cache errors
+- Duplicate/generated-code collisions
 
 Do not expose internal implementation details in HTTP error responses.
 
-------------------------------------------------------------------------
-
-## Testing
-
-Add tests for important application behavior.
-
-At minimum consider:
-
--   URL validation
--   Short-code generation
--   Creating a URL
--   Looking up an existing URL
--   Looking up an unknown URL
--   Expiration behavior
-
-------------------------------------------------------------------------
+---
 
 ## Concepts to Practice
 
 This project should reinforce:
 
--   Go packages
--   Structs
--   Interfaces where they provide a real benefit
--   Error handling
--   `context.Context`
--   HTTP handlers
--   JSON encoding/decoding
--   PostgreSQL
--   SQL
--   sqlc
--   Environment configuration
--   Graceful shutdown
--   Docker
--   Redis
--   Caching
--   TTL
--   Cache misses
--   Database/cache interaction
--   Basic API design
+- Go packages
+- Structs
+- Interfaces where they provide a real benefit
+- Error handling
+- `context.Context`
+- HTTP handlers
+- JSON encoding/decoding
+- PostgreSQL
+- SQL
+- sqlc
+- Environment configuration
+- Graceful shutdown
+- Docker
+- Redis
+- Caching
+- TTL
+- Cache misses
+- Database/cache interaction
+- Basic API design
 
 ## Constraint
 
@@ -190,11 +175,11 @@ Build the implementation yourself.
 
 AI assistance should primarily be used for:
 
--   Explaining concepts
--   Go syntax questions
--   Documentation questions
--   Hints when blocked
--   Code review after you implement something
+- Explaining concepts
+- Go syntax questions
+- Documentation questions
+- Hints when blocked
+- Code review after you implement something
 
 Avoid requesting complete implementations unless you explicitly want to
 inspect a reference solution.
@@ -203,28 +188,28 @@ inspect a reference solution.
 
 The project is complete when:
 
--   A URL can be shortened.
--   The generated short URL redirects correctly.
--   Data persists in PostgreSQL.
--   Clicks are counted.
--   Expired URLs stop working.
--   Configuration comes from environment variables.
--   The service shuts down gracefully.
--   PostgreSQL and Redis can run through Docker Compose.
--   Redis caches URL lookups.
--   Important behavior has tests.
--   A README explains how to run and use the project.
+- A URL can be shortened.
+- The generated short URL redirects correctly.
+- Data persists in PostgreSQL.
+- Clicks are counted.
+- Expired URLs stop working.
+- Configuration comes from environment variables.
+- The service shuts down gracefully.
+- PostgreSQL and Redis can run through Docker Compose.
+- Redis caches URL lookups.
+- Important behavior has tests.
+- A README explains how to run and use the project.
 
 ## Optional Extensions
 
 Only after the MVP is complete:
 
--   Custom short codes
--   Rate limiting
--   Link deletion
--   Link analytics
--   QR-code generation
--   Authentication
--   Per-user links
--   Cache invalidation strategy
--   Benchmarking the API with your Go Load Tester
+- Custom short codes
+- Rate limiting
+- Link deletion
+- Link analytics
+- QR-code generation
+- Authentication
+- Per-user links
+- Cache invalidation strategy
+- Benchmarking the API with your Go Load Tester

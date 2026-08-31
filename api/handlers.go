@@ -9,14 +9,16 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/redis/go-redis/v9"
 )
 
 type Handler struct {
 	queries *db.Queries
+	rdb     *redis.Client
 }
 
-func NewHandler(queries *db.Queries) *Handler {
-	return &Handler{queries: queries}
+func NewHandler(queries *db.Queries, rdb *redis.Client) *Handler {
+	return &Handler{queries: queries, rdb: rdb}
 }
 
 func (h *Handler) CreateURL(w http.ResponseWriter, r *http.Request) {
@@ -88,6 +90,24 @@ func (h *Handler) CreateURL(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) RedirectToURL(w http.ResponseWriter, r *http.Request) {
 	code := r.PathValue("code")
+	key := "url:" + code
+
+	destinationURL, err := h.rdb.Get(r.Context(), key).Result()
+
+	if err == nil {
+		// CACHE HIT
+
+		if err := h.queries.IncrementClickCount(r.Context(), code); err != nil {
+			log.Println("failed to increment click count:", err)
+		}
+
+		http.Redirect(w, r, destinationURL, http.StatusFound)
+		return
+	}
+
+	if err != redis.Nil {
+		log.Println("redis get error:", err)
+	}
 
 	url, err := h.queries.GetURLByShortCode(r.Context(), code)
 
@@ -99,6 +119,27 @@ func (h *Handler) RedirectToURL(w http.ResponseWriter, r *http.Request) {
 	if url.ExpiresAt.Valid && !time.Now().Before(url.ExpiresAt.Time) {
 		http.Error(w, "url has expired", http.StatusGone)
 		return
+	}
+
+	ttl := 10 * time.Minute
+
+	if url.ExpiresAt.Valid {
+		timeUntilExpiration := time.Until(url.ExpiresAt.Time)
+
+		if timeUntilExpiration < ttl {
+			ttl = timeUntilExpiration
+		}
+	}
+
+	err = h.rdb.Set(
+		r.Context(),
+		key,
+		url.DestinationUrl,
+		ttl,
+	).Err()
+
+	if err != nil {
+		log.Println("redis set error:", err)
 	}
 
 	if err := h.queries.IncrementClickCount(r.Context(), code); err != nil {
